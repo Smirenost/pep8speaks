@@ -263,7 +263,6 @@ def run_pycodestyle(ghrequest, config):
 
 def prepare_comment(ghrequest, config):
     """Construct the string of comment i.e. its header, body and footer."""
-    author = ghrequest.author
     # Write the comment body
     # ## Header
     comment_header = ""
@@ -274,6 +273,7 @@ def prepare_comment(ghrequest, config):
         action_text = "updating"
     if action_text:
         comment_header = config["message"][action_text[:-3] + "ed"]["header"]
+        author = ghrequest.author
         if comment_header == "":
             comment_header = (
                 "Hello @{author!s}! Thanks for {action_text} this PR. "
@@ -465,10 +465,11 @@ def autopep8(ghrequest, config):
 
 def create_gist(ghrequest):
     """Create gists for diff files"""
-    request_json = {}
-    request_json["public"] = True
-    request_json["files"] = {}
-    request_json["description"] = f"In response to @{ghrequest.reviewer}'s comment: {ghrequest.review_url}"
+    request_json = {
+        "public": True,
+        "files": {},
+        "description": f"In response to @{ghrequest.reviewer}'s comment: {ghrequest.review_url}",
+    }
 
     for diff_file, diffs in ghrequest.diff.items():
         if len(diffs) != 0:
@@ -488,11 +489,13 @@ def delete_if_forked(ghrequest):
     query = "/user/repos"
     r = utils.query_request(query)
     for repo in r.json():
-        if repo["description"]:
-            if ghrequest.target_repo_fullname in repo["description"]:
-                FORKED = True
-                url = f"/repos/{repo['full_name']}"
-                utils.query_request(url, method='DELETE')
+        if (
+            repo["description"]
+            and ghrequest.target_repo_fullname in repo["description"]
+        ):
+            FORKED = True
+            url = f"/repos/{repo['full_name']}"
+            utils.query_request(url, method='DELETE')
     return FORKED
 
 
