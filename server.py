@@ -13,7 +13,7 @@ def create_app():
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    @app.route("/", methods=['GET', 'POST'])
+    @app.route("/", methods=["GET", "POST"])
     def main():
         """Main function to handle all requests."""
         if request.method != "POST":
@@ -42,7 +42,7 @@ def create_app():
             return handlers.handle_unauthorized_requests()
 
     app.secret_key = os.environ.setdefault("APP_SECRET_KEY", "")
-    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config["SESSION_TYPE"] = "filesystem"
 
     app.debug = False
     return app
@@ -51,5 +51,5 @@ def create_app():
 app = create_app()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
