@@ -4,7 +4,6 @@ import os
 import sys
 
 from flask import Flask, redirect, request
-
 from pep8speaks import handlers, utils
 
 

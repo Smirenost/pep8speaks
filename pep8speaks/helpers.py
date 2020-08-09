@@ -6,10 +6,10 @@ import datetime
 import json
 import logging
 import os
-from pathlib import Path
 import re
 import subprocess
 import time
+from pathlib import Path
 
 import unidiff
 import yaml
