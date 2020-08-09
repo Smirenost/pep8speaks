@@ -66,8 +66,7 @@ def read_setup_cfg_file(setup_config_file):
         try:
             value = setup_config_section[key]
             value = value.split(" ")[0].strip(
-                ",#"
-            )  # In case there are comments on the line
+                ",#")  # In case there are comments on the line
             if key == "max-line-length":
                 value = int(value)
             linter_cfg_config[key] = value
@@ -100,11 +99,8 @@ def get_config(repo, base_branch, after_commit_hash):
     """
 
     # Default configuration parameters
-    default_config = (
-        Path(__file__)
-        .absolute()
-        .parent.parent.joinpath("data", "default_pep8speaks.yml")
-    )
+    default_config = (Path(__file__).absolute().parent.parent.joinpath(
+        "data", "default_pep8speaks.yml"))
     with open(default_config, "r") as config_file:
         config = yaml.safe_load(config_file)
 
@@ -241,7 +237,8 @@ def run_pycodestyle(ghrequest, config):
         filename = py_file[1:]
         query = f"https://raw.githubusercontent.com/{repo}/{commit}/{py_file}"
         r = utils.query_request(query)
-        with open("file_to_check.py", "w+", encoding=r.encoding) as file_to_check:
+        with open("file_to_check.py", "w+",
+                  encoding=r.encoding) as file_to_check:
             file_to_check.write(r.text)
 
         # Use the command line here
@@ -251,7 +248,8 @@ def run_pycodestyle(ghrequest, config):
             cmd = f'pycodestyle {config["pycodestyle_cmd_config"]} file_to_check.py'
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         stdout, _ = proc.communicate()
-        ghrequest.extra_results[filename] = stdout.decode(r.encoding).splitlines()
+        ghrequest.extra_results[filename] = stdout.decode(
+            r.encoding).splitlines()
 
         # Put only relevant errors in the ghrequest.results dictionary
         ghrequest.results[filename] = []
@@ -260,8 +258,7 @@ def run_pycodestyle(ghrequest, config):
             # Other error codes are B C D T
             if re.search(relevant_error_pattern, error):
                 ghrequest.results[filename].append(
-                    error.replace("file_to_check.py", filename)
-                )
+                    error.replace("file_to_check.py", filename))
                 ghrequest.extra_results[filename].remove(error)
 
         # Replace file_to_check.py with filename in all additional errors
@@ -300,10 +297,8 @@ def prepare_comment(ghrequest, config):
             comment_header = (
                 "Hello @{author!s}! Thanks for {action_text} this PR. "
                 "We checked the lines you've touched for [PEP\N{NBSP}8]"
-                "(https://www.python.org/dev/peps/pep-0008) issues, and found:".format(
-                    author=author, action_text=action_text
-                )
-            )
+                "(https://www.python.org/dev/peps/pep-0008) issues, and found:"
+                .format(author=author, action_text=action_text))
         comment_header = comment_header + "\n\n"
 
     # ## Body
@@ -343,7 +338,8 @@ def prepare_comment(ghrequest, config):
 
         comment_body.append("\n\n")
         if ghrequest.extra_results[gh_file]:
-            logging.debug("There are extra results which are not being printed.")
+            logging.debug(
+                "There are extra results which are not being printed.")
             logging.debug(ghrequest.extra_results[gh_file])
             # comment_body.append("* Additional results for this file:\n\n> ")
             # comment_body.append(
@@ -360,7 +356,8 @@ def prepare_comment(ghrequest, config):
     # ## Footer
     comment_footer = []
     if action_text:
-        comment_footer.append(config["message"][action_text[:-3] + "ed"]["footer"])
+        comment_footer.append(config["message"][action_text[:-3] +
+                                                "ed"]["footer"])
 
     comment_footer = "".join(comment_footer)
 
@@ -402,23 +399,24 @@ def comment_permission_check(ghrequest):
     # In commits
     commits = utils.query_request(ghrequest.commits_url).json()
     for commit in commits:
-        if any(
-            m in commit["commit"]["message"].lower()
-            for m in ["[skip pep8]", "[pep8 skip]"]
-        ):
+        if any(m in commit["commit"]["message"].lower()
+               for m in ["[skip pep8]", "[pep8 skip]"]):
             return False
     # PR title
-    if any(m in ghrequest.pr_title.lower() for m in ["[skip pep8]", "[pep8 skip]"]):
+    if any(m in ghrequest.pr_title.lower()
+           for m in ["[skip pep8]", "[pep8 skip]"]):
         return False
     # PR description
     if ghrequest.pr_desc:
-        if any(m in ghrequest.pr_desc.lower() for m in ["[skip pep8]", "[pep8 skip]"]):
+        if any(m in ghrequest.pr_desc.lower()
+               for m in ["[skip pep8]", "[pep8 skip]"]):
             return False
 
     return True
 
 
-def create_or_update_comment(ghrequest, comment, ONLY_UPDATE_COMMENT_BUT_NOT_CREATE):
+def create_or_update_comment(ghrequest, comment,
+                             ONLY_UPDATE_COMMENT_BUT_NOT_CREATE):
     query = f"/repos/{ghrequest.repository}/issues/{str(ghrequest.pr_number)}/comments"
     comments = utils.query_request(query).json()
 
@@ -429,12 +427,11 @@ def create_or_update_comment(ghrequest, comment, ONLY_UPDATE_COMMENT_BUT_NOT_CRE
             last_comment_id = old_comment["id"]
             break
 
-    if (
-        last_comment_id is None and not ONLY_UPDATE_COMMENT_BUT_NOT_CREATE
-    ):  # Create a new comment
-        response = utils.query_request(
-            query=query, method="POST", json={"body": comment}
-        )
+    if (last_comment_id is None and
+            not ONLY_UPDATE_COMMENT_BUT_NOT_CREATE):  # Create a new comment
+        response = utils.query_request(query=query,
+                                       method="POST",
+                                       json={"body": comment})
         ghrequest.comment_response = response.json()
     else:  # Update the last comment
         utc_time = datetime.datetime.utcnow()
@@ -442,7 +439,9 @@ def create_or_update_comment(ghrequest, comment, ONLY_UPDATE_COMMENT_BUT_NOT_CRE
         comment += f"\n\n##### Comment last updated at {time_now!s}"
 
         query = f"/repos/{ghrequest.repository}/issues/comments/{str(last_comment_id)}"
-        response = utils.query_request(query, method="PATCH", json={"body": comment})
+        response = utils.query_request(query,
+                                       method="PATCH",
+                                       json={"body": comment})
 
     return response
 
@@ -486,24 +485,26 @@ def autopep8(ghrequest, config):
 
         # Fix the errors
         ghrequest.diff[filename] = ghrequest.diff[filename].replace(
-            "file_to_check.py", filename
-        )
-        ghrequest.diff[filename] = ghrequest.diff[filename].replace("\\", "\\\\")
+            "file_to_check.py", filename)
+        ghrequest.diff[filename] = ghrequest.diff[filename].replace(
+            "\\", "\\\\")
 
         # Store the link to the file
         ghrequest.links = {}
         ghrequest.links[
-            filename + "_link"
-        ] = f"https://github.com/{ghrequest.repository}/blob/{ghrequest.sha}{py_file}"
+            filename +
+            "_link"] = f"https://github.com/{ghrequest.repository}/blob/{ghrequest.sha}{py_file}"
         os.remove("file_to_fix.py")
 
 
 def create_gist(ghrequest):
     """Create gists for diff files"""
     request_json = {
-        "public": True,
+        "public":
+        True,
         "files": {},
-        "description": f"In response to @{ghrequest.reviewer}'s comment: {ghrequest.review_url}",
+        "description":
+        f"In response to @{ghrequest.reviewer}'s comment: {ghrequest.review_url}",
     }
 
     for diff_file, diffs in ghrequest.diff.items():
@@ -514,7 +515,8 @@ def create_gist(ghrequest):
 
     # Call github api to create the gist
     query = "/gists"
-    response = utils.query_request(query, method="POST", json=request_json).json()
+    response = utils.query_request(query, method="POST",
+                                   json=request_json).json()
     ghrequest.gist_response = response
     ghrequest.gist_url = response["html_url"]
 
@@ -524,10 +526,8 @@ def delete_if_forked(ghrequest):
     query = "/user/repos"
     r = utils.query_request(query)
     for repo in r.json():
-        if (
-            repo["description"]
-            and ghrequest.target_repo_fullname in repo["description"]
-        ):
+        if (repo["description"]
+                and ghrequest.target_repo_fullname in repo["description"]):
             FORKED = True
             url = f"/repos/{repo['full_name']}"
             utils.query_request(url, method="DELETE")
@@ -561,8 +561,13 @@ def update_fork_desc(ghrequest):
 
     full_name = ghrequest.target_repo_fullname
     author, name = full_name.split("/")
-    request_json = {"name": name, "description": f"Forked from @{author}'s {full_name}"}
-    r = utils.query_request(query, method="PATCH", data=json.dumps(request_json))
+    request_json = {
+        "name": name,
+        "description": f"Forked from @{author}'s {full_name}"
+    }
+    r = utils.query_request(query,
+                            method="PATCH",
+                            data=json.dumps(request_json))
     if r.status_code != 200:
         ghrequest.error = "Could not update description of the fork"
 

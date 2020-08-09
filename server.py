@@ -28,9 +28,12 @@ def create_app():
             app.logger.debug(f"Request body:\n{request.json}")
             event_to_action = {
                 "pull_request": handlers.handle_pull_request,
-                "integration_installation": handlers.handle_integration_installation,
-                "integration_installation_repositories": handlers.handle_integration_installation_repo,
-                "installation_repositories": handlers.handle_integration_installation_repo,
+                "integration_installation":
+                handlers.handle_integration_installation,
+                "integration_installation_repositories":
+                handlers.handle_integration_installation_repo,
+                "installation_repositories":
+                handlers.handle_integration_installation_repo,
                 "ping": handlers.handle_ping,
                 "issue_comment": handlers.handle_issue_comment,
                 "installation": handlers.handle_installation,
@@ -52,7 +55,6 @@ def create_app():
 
 
 app = create_app()
-
 
 if __name__ == "__main__":
     app.run(debug=True)
