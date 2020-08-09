@@ -213,7 +213,7 @@ def run_pycodestyle(ghrequest, config):
     commit = ghrequest.after_commit_hash
 
     # Run linter
-    ## All the python files with additions
+    # All the python files with additions
     # A dictionary with filename paired with list of new line numbers
     files_to_exclude = config[linter]["exclude"]
     py_files = get_py_files_in_pr(repo, pr_number, files_to_exclude)
@@ -248,14 +248,14 @@ def run_pycodestyle(ghrequest, config):
         extras = ghrequest.extra_results[filename]
         ghrequest.extra_results[filename] = [e.replace("file_to_check.py", filename) for e in extras]
 
-        ## Remove errors in case of diff_only = True
-        ## which are caused in the whole file
+        # Remove errors in case of diff_only = True
+        # which are caused in the whole file
         for error in list(ghrequest.results[filename]):
             if config["scanner"]["diff_only"]:
                 if not int(error.split(":")[1]) in py_files[py_file]:
                     ghrequest.results[filename].remove(error)
 
-        ## Store the link to the file
+        # Store the link to the file
         url = f"https://github.com/{repo}/blob/{commit}{py_file}"
         ghrequest.links[filename + "_link"] = url
         os.remove("file_to_check.py")
@@ -375,15 +375,15 @@ def comment_permission_check(ghrequest):
                 return False
 
     # Check for [skip pep8]
-    ## In commits
+    # In commits
     commits = utils.query_request(ghrequest.commits_url).json()
     for commit in commits:
         if any(m in commit["commit"]["message"].lower() for m in ["[skip pep8]", "[pep8 skip]"]):
             return False
-    ## PR title
+    # PR title
     if any(m in ghrequest.pr_title.lower() for m in ["[skip pep8]", "[pep8 skip]"]):
         return False
-    ## PR description
+    # PR description
     if ghrequest.pr_desc:
         if any(m in ghrequest.pr_desc.lower() for m in ["[skip pep8]", "[pep8 skip]"]):
             return False
@@ -420,7 +420,7 @@ def autopep8(ghrequest, config):
     # Run pycodestyle
 
     r = utils.query_request(ghrequest.diff_url)
-    ## All the python files with additions
+    # All the python files with additions
     patch = unidiff.PatchSet(r.content.splitlines(), encoding=r.encoding)
 
     # A dictionary with filename paired with list of new line numbers
@@ -457,7 +457,7 @@ def autopep8(ghrequest, config):
         ghrequest.diff[filename] = ghrequest.diff[filename].replace("file_to_check.py", filename)
         ghrequest.diff[filename] = ghrequest.diff[filename].replace("\\", "\\\\")
 
-        ## Store the link to the file
+        # Store the link to the file
         ghrequest.links = {}
         ghrequest.links[filename + "_link"] = f"https://github.com/{ghrequest.repository}/blob/{ghrequest.sha}{py_file}"
         os.remove("file_to_fix.py")
@@ -559,7 +559,7 @@ def autopep8ify(ghrequest, config):
     # Run pycodestyle
     r = utils.query_request(ghrequest.diff_url)
 
-    ## All the python files with additions
+    # All the python files with additions
     patch = unidiff.PatchSet(r.content.splitlines(), encoding=r.encoding)
 
     # A dictionary with filename paired with list of new line numbers
