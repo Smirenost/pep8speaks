@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import base64
 import configparser
 import datetime
@@ -13,6 +12,7 @@ from pathlib import Path
 
 import unidiff
 import yaml
+
 from pep8speaks import utils
 
 

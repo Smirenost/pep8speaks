@@ -3,8 +3,12 @@ import logging
 import os
 import sys
 
-from flask import Flask, redirect, request
-from pep8speaks import handlers, utils
+from flask import Flask
+from flask import redirect
+from flask import request
+
+from pep8speaks import handlers
+from pep8speaks import utils
 
 
 def create_app():
