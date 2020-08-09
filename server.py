@@ -3,9 +3,12 @@ import logging
 import os
 import sys
 
-from flask import Flask, redirect, request
+from flask import Flask
+from flask import redirect
+from flask import request
 
-from pep8speaks import handlers, utils
+from pep8speaks import handlers
+from pep8speaks import utils
 
 
 def create_app():
@@ -13,7 +16,7 @@ def create_app():
 
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
-    @app.route("/", methods=['GET', 'POST'])
+    @app.route("/", methods=["GET", "POST"])
     def main():
         """Main function to handle all requests."""
         if request.method != "POST":
@@ -25,9 +28,12 @@ def create_app():
             app.logger.debug(f"Request body:\n{request.json}")
             event_to_action = {
                 "pull_request": handlers.handle_pull_request,
-                "integration_installation": handlers.handle_integration_installation,
-                "integration_installation_repositories": handlers.handle_integration_installation_repo,
-                "installation_repositories": handlers.handle_integration_installation_repo,
+                "integration_installation":
+                handlers.handle_integration_installation,
+                "integration_installation_repositories":
+                handlers.handle_integration_installation_repo,
+                "installation_repositories":
+                handlers.handle_integration_installation_repo,
                 "ping": handlers.handle_ping,
                 "issue_comment": handlers.handle_issue_comment,
                 "installation": handlers.handle_installation,
@@ -42,7 +48,7 @@ def create_app():
             return handlers.handle_unauthorized_requests()
 
     app.secret_key = os.environ.setdefault("APP_SECRET_KEY", "")
-    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config["SESSION_TYPE"] = "filesystem"
 
     app.debug = False
     return app
@@ -50,6 +56,5 @@ def create_app():
 
 app = create_app()
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
